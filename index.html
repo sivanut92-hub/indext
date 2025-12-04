@@ -311,15 +311,70 @@
       color: #0f172a;
     }
 
-    .pie-wrapper {
+    /* กราฟแท่งเดือนนี้ */
+    .bar-chart-month {
       display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
+      gap: 20px;
       justify-content: center;
+      align-items: flex-end;
+      min-height: 140px;
+      padding: 6px 4px 4px;
+    }
+    .bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+    }
+    .bar-rect {
+      width: 32px;
+      border-radius: 10px 10px 4px 4px;
+      background: #e5e7eb;
+      transition: height 0.2s ease;
+      height: 10px;
+    }
+    .bar-rect.income {
+      background: linear-gradient(180deg,#bbf7d0,#22c55e);
+    }
+    .bar-rect.expense {
+      background: linear-gradient(180deg,#fecaca,#fb7185);
+    }
+    .bar-label { color:#4b5563; font-weight:600; }
+    .bar-value { font-size:12px; color:#111827; }
+
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+      min-width: 140px;
+      margin-top: 4px;
     }
 
-    .pie-chart {
+    .legend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.95);
+      padding: 5px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(226,232,240,0.9);
+    }
+
+    .legend-left { display: flex; align-items: center; gap: 6px; }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-label { font-weight: 600; }
+    .legend-amount { font-weight: 600; }
+
+    /* Pie chart สำหรับรายปี (รับ vs จ่าย) */
+    .pie-chart-year {
       width: 130px;
       height: 130px;
       border-radius: 50%;
@@ -352,37 +407,6 @@
       color: #0f172a;
       margin-top: 2px;
     }
-
-    .pie-legend {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 12px;
-      min-width: 140px;
-    }
-
-    .legend-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(255,255,255,0.95);
-      padding: 5px 8px;
-      border-radius: 10px;
-      border: 1px solid rgba(226,232,240,0.9);
-    }
-
-    .legend-left { display: flex; align-items: center; gap: 6px; }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    .legend-label { font-weight: 600; }
-    .legend-amount { font-weight: 600; }
-    .legend-amount.income { color: var(--income-color); }
-    .legend-amount.expense { color: var(--expense-color); }
 
     /* รายงานแบบแบ่งวัน / ตาราง */
     .report-container {
@@ -563,7 +587,7 @@
       body { padding: 8px; }
       .page-inner { padding: 12px 10px 8px; }
       h1 { font-size: 20px; }
-      .pie-chart { width: 120px; height: 120px; }
+      .pie-chart-year { width: 120px; height: 120px; }
     }
   </style>
 </head>
@@ -637,15 +661,20 @@
             <div class="balance-value" id="balanceMonth">0.00 ฿</div>
           </div>
 
-          <div class="pie-wrapper">
-            <div class="pie-chart" id="pieChartMonth">
-              <div class="pie-center-label">
-                <div>รายจ่าย</div>
-                <div class="pie-center-value" id="pieCenterLabelMonth">0.00 ฿</div>
-              </div>
+          <div class="bar-chart-month">
+            <div class="bar-col">
+              <div id="barIncome" class="bar-rect income"></div>
+              <div class="bar-label">รายรับ</div>
+              <div id="barIncomeValue" class="bar-value">0.00 ฿</div>
             </div>
-            <div class="pie-legend" id="categoryLegendMonth"></div>
+            <div class="bar-col">
+              <div id="barExpense" class="bar-rect expense"></div>
+              <div class="bar-label">รายจ่าย</div>
+              <div id="barExpenseValue" class="bar-value">0.00 ฿</div>
+            </div>
           </div>
+
+          <div class="pie-legend" id="categoryLegendMonth"></div>
         </div>
 
         <div class="table-panel">
@@ -670,7 +699,7 @@
           </div>
 
           <div class="pie-wrapper">
-            <div class="pie-chart" id="pieChartYear">
+            <div class="pie-chart-year" id="pieChartYear">
               <div class="pie-center-label">
                 <div>รับ / จ่าย</div>
                 <div class="pie-center-value" id="pieCenterLabelYear">0 : 0</div>
@@ -679,17 +708,17 @@
             <div class="pie-legend">
               <div class="legend-item">
                 <div class="legend-left">
-                  <span class="legend-dot income"></span>
+                  <span class="legend-dot" style="background:var(--income-color)"></span>
                   <span class="legend-label">รายรับ</span>
                 </div>
-                <span class="legend-amount income" id="legendIncomeYear">0.00 ฿</span>
+                <span class="legend-amount" id="legendIncomeYear">0.00 ฿</span>
               </div>
               <div class="legend-item">
                 <div class="legend-left">
-                  <span class="legend-dot expense"></span>
+                  <span class="legend-dot" style="background:var(--expense-color)"></span>
                   <span class="legend-label">รายจ่าย</span>
                 </div>
-                <span class="legend-amount expense" id="legendExpenseYear">0.00 ฿</span>
+                <span class="legend-amount" id="legendExpenseYear">0.00 ฿</span>
               </div>
             </div>
           </div>
@@ -865,7 +894,7 @@
       populateCategoryGrid();
     }
 
-    /* สำหรับ Pie chart รวมรายรับ/รายจ่าย (ใช้ในหน้า "รายปี") */
+    /* Pie chart (รายปี) = รวมรายรับ/รายจ่าย */
     function updatePieChart(totalIncome, totalExpense, pieChart, centerEl, legendIncome, legendExpense) {
       const total = totalIncome + totalExpense;
 
@@ -889,18 +918,46 @@
       centerEl.textContent = `${iShort}% : ${eShort}%`;
     }
 
-    /* Pie chart รายเดือน = แบ่งตามหมวดหมู่รายจ่าย */
-    function updateCategoryPieMonth(listMonth) {
-      const pieChart = document.getElementById('pieChartMonth');
-      const centerEl = document.getElementById('pieCenterLabelMonth');
-      const legendContainer = document.getElementById('categoryLegendMonth');
+    /* กราฟแท่งรายเดือน */
+    function resetBarChartMonth() {
+      const barIncome = document.getElementById('barIncome');
+      const barExpense = document.getElementById('barExpense');
+      const incomeVal = document.getElementById('barIncomeValue');
+      const expenseVal = document.getElementById('barExpenseValue');
 
+      barIncome.style.height = '10px';
+      barExpense.style.height = '10px';
+      incomeVal.textContent = '0.00 ฿';
+      expenseVal.textContent = '0.00 ฿';
+    }
+
+    function updateBarChartMonth(totalIncome, totalExpense) {
+      const barIncome = document.getElementById('barIncome');
+      const barExpense = document.getElementById('barExpense');
+      const incomeVal = document.getElementById('barIncomeValue');
+      const expenseVal = document.getElementById('barExpenseValue');
+
+      const max = Math.max(totalIncome, totalExpense, 1);
+      const minHeight = 10;  // px
+      const maxHeight = 120; // px
+
+      const incomeH = minHeight + (totalIncome / max) * (maxHeight - minHeight);
+      const expenseH = minHeight + (totalExpense / max) * (maxHeight - minHeight);
+
+      barIncome.style.height = incomeH + 'px';
+      barExpense.style.height = expenseH + 'px';
+
+      incomeVal.textContent = formatNumber(totalIncome) + ' ฿';
+      expenseVal.textContent = formatNumber(totalExpense) + ' ฿';
+    }
+
+    /* สรุปรายจ่ายตามหมวดหมู่ (legend) */
+    function updateExpenseCategoryListMonth(listMonth) {
+      const legendContainer = document.getElementById('categoryLegendMonth');
       legendContainer.innerHTML = '';
 
       const expenses = listMonth.filter(item => item.type === 'expense');
       if (expenses.length === 0) {
-        pieChart.style.background = 'conic-gradient(#e5e7eb 0 100%)';
-        centerEl.textContent = '0.00 ฿';
         const div = document.createElement('div');
         div.className = 'no-data';
         div.textContent = 'ไม่มีรายจ่ายในเดือนนี้';
@@ -927,22 +984,9 @@
         '#8b5cf6','#ec4899','#14b8a6','#a855f7','#f59e0b','#4b5563'
       ];
 
-      let start = 0;
-      const segments = [];
       entries.forEach((entry, idx) => {
-        const pct = (entry.amount / totalExpense) * 100;
-        const end = start + pct;
-        const color = colors[idx % colors.length];
-        segments.push(`${color} ${start}% ${end}%`);
-        entry.color = color;
-        start = end;
-      });
-
-      pieChart.style.background = `conic-gradient(${segments.join(',')})`;
-      centerEl.textContent = formatNumber(totalExpense) + ' ฿';
-
-      entries.forEach(entry => {
         const percent = (entry.amount / totalExpense) * 100;
+        const color = colors[idx % colors.length];
 
         const item = document.createElement('div');
         item.className = 'legend-item';
@@ -952,7 +996,7 @@
 
         const dot = document.createElement('span');
         dot.className = 'legend-dot';
-        dot.style.background = entry.color;
+        dot.style.background = color;
 
         const label = document.createElement('span');
         label.className = 'legend-label';
@@ -967,7 +1011,6 @@
 
         item.appendChild(left);
         item.appendChild(right);
-
         legendContainer.appendChild(item);
       });
     }
@@ -1022,9 +1065,6 @@
 
       container.innerHTML = '';
 
-      let totalIncome = 0;
-      let totalExpense = 0;
-
       if (list.length === 0) {
         const div = document.createElement('div');
         div.className = 'no-data';
@@ -1032,17 +1072,26 @@
         container.appendChild(div);
 
         balanceEl.textContent = '0.00 ฿';
-        updateCategoryPieMonth(list);
+        resetBarChartMonth();
+        updateExpenseCategoryListMonth([]);
         return;
       }
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      list.forEach(item => {
+        if (item.type === 'income') totalIncome += item.amount;
+        else totalExpense += item.amount;
+      });
+
+      updateBarChartMonth(totalIncome, totalExpense);
+      updateExpenseCategoryListMonth(list);
 
       const groups = {};
       list.forEach(item => {
         if (!groups[item.date]) groups[item.date] = [];
         groups[item.date].push(item);
-
-        if (item.type === 'income') totalIncome += item.amount;
-        else totalExpense += item.amount;
       });
 
       const dates = Object.keys(groups).sort((a, b) => b.localeCompare(a));
@@ -1174,7 +1223,6 @@
       });
 
       balanceEl.textContent = formatNumber(totalIncome - totalExpense) + ' ฿';
-      updateCategoryPieMonth(list);
     }
 
     /* --- เรนเดอร์รายปี (สรุปรายเดือนเท่านั้น) --- */
@@ -1446,4 +1494,3 @@
   </script>
 </body>
 </html>
-

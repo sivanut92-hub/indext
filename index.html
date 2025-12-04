@@ -69,7 +69,7 @@
     }
 
     .month-balance {
-      margin: 4px auto 10px;
+      margin: 8px auto 0;
       padding: 6px 12px;
       border-radius: 999px;
       background: linear-gradient(135deg,#ecfeff,#f5f3ff);
@@ -117,6 +117,7 @@
     }
 
     input[type="date"],
+    input[type="month"],
     input[type="number"],
     input[type="text"] {
       width: 100%;
@@ -259,6 +260,9 @@
     /* SUMMARY TAB */
     .panel-summary {
       background: linear-gradient(135deg, #fdf2ff, #e0f2fe);
+      position: sticky;
+      top: 0;
+      z-index: 5;
     }
 
     .filter-row {
@@ -273,7 +277,8 @@
 
     .filter-row span.label { font-weight: 500; }
 
-    .filter-row input[type="month"] {
+    .filter-row input[type="month"],
+    .filter-row input.year-input {
       width: auto;
       min-width: 130px;
       padding: 6px 10px;
@@ -380,7 +385,7 @@
 
     /* รายงานแบบแบ่งวัน */
     .report-container {
-      max-height: 320px;
+      max-height: 380px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       display: flex;
@@ -534,10 +539,6 @@
         <div class="panel panel-form">
           <h1>Money note</h1>
           <div class="subtitle">จดรายรับรายจ่ายแบบง่าย ๆ ทุกวัน</div>
-          <div class="month-balance">
-            คงเหลือเดือนนี้:
-            <strong id="monthBalanceValue">0.00 ฿</strong>
-          </div>
 
           <div class="field">
             <label for="date">วันที่</label>
@@ -578,30 +579,35 @@
           <div class="button-row">
             <button class="btn-primary" id="btnSave">บันทึกรายการ</button>
           </div>
+
+          <div class="month-balance">
+            คงเหลือเดือนนี้:
+            <strong id="monthBalanceValue">0.00 ฿</strong>
+          </div>
         </div>
       </div>
 
-      <!-- TAB 2: สรุปรายเดือน/ปี -->
+      <!-- TAB 2: สรุปรายเดือน -->
       <div id="tab2" class="tab-content">
         <div class="panel panel-summary">
-          <h2>สรุปภาพรวม</h2>
+          <h2>สรุปรายเดือน</h2>
 
           <div class="filter-row">
-            <span class="label">ดูตามเดือน / ปี:</span>
+            <span class="label">เลือกเดือน / ปี:</span>
             <input type="month" id="filterMonth">
             <button class="btn-danger-ghost" id="btnClearAll">ล้างข้อมูลทั้งหมด</button>
           </div>
 
           <div class="balance-box">
-            <div class="balance-label">ยอดเงินคงเหลือในช่วงที่เลือก</div>
-            <div class="balance-value" id="balance">0.00 ฿</div>
+            <div class="balance-label">ยอดเงินคงเหลือในเดือนที่เลือก</div>
+            <div class="balance-value" id="balanceMonth">0.00 ฿</div>
           </div>
 
           <div class="pie-wrapper">
-            <div class="pie-chart" id="pieChart">
+            <div class="pie-chart" id="pieChartMonth">
               <div class="pie-center-label">
                 <div>รับ / จ่าย</div>
-                <div class="pie-center-value" id="pieCenterLabel">0 : 0</div>
+                <div class="pie-center-value" id="pieCenterLabelMonth">0 : 0</div>
               </div>
             </div>
             <div class="pie-legend">
@@ -610,22 +616,71 @@
                   <span class="legend-dot income"></span>
                   <span class="legend-label">รายรับ</span>
                 </div>
-                <span class="legend-amount income" id="legendIncome">0.00 ฿</span>
+                <span class="legend-amount income" id="legendIncomeMonth">0.00 ฿</span>
               </div>
               <div class="legend-item">
                 <div class="legend-left">
                   <span class="legend-dot expense"></span>
                   <span class="legend-label">รายจ่าย</span>
                 </div>
-                <span class="legend-amount expense" id="legendExpense">0.00 ฿</span>
+                <span class="legend-amount expense" id="legendExpenseMonth">0.00 ฿</span>
               </div>
             </div>
           </div>
         </div>
 
         <div class="table-panel">
-          <h2>รายการทั้งหมด (ตามตัวกรอง)</h2>
-          <div id="reportContainer" class="report-container">
+          <h2>รายการทั้งหมด (ตามเดือน)</h2>
+          <div id="reportContainerMonth" class="report-container">
+            <!-- เติมด้วย JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: สรุปรายปี -->
+      <div id="tab3" class="tab-content">
+        <div class="panel panel-summary">
+          <h2>สรุปรายปี</h2>
+
+          <div class="filter-row">
+            <span class="label">เลือกปี (ค.ศ.):</span>
+            <input type="number" id="filterYear" class="year-input" min="2000" max="2099" step="1">
+          </div>
+
+          <div class="balance-box">
+            <div class="balance-label">ยอดเงินคงเหลือในปีที่เลือก</div>
+            <div class="balance-value" id="balanceYear">0.00 ฿</div>
+          </div>
+
+          <div class="pie-wrapper">
+            <div class="pie-chart" id="pieChartYear">
+              <div class="pie-center-label">
+                <div>รับ / จ่าย</div>
+                <div class="pie-center-value" id="pieCenterLabelYear">0 : 0</div>
+              </div>
+            </div>
+            <div class="pie-legend">
+              <div class="legend-item">
+                <div class="legend-left">
+                  <span class="legend-dot income"></span>
+                  <span class="legend-label">รายรับ</span>
+                </div>
+                <span class="legend-amount income" id="legendIncomeYear">0.00 ฿</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-left">
+                  <span class="legend-dot expense"></span>
+                  <span class="legend-label">รายจ่าย</span>
+                </div>
+                <span class="legend-amount expense" id="legendExpenseYear">0.00 ฿</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-panel">
+          <h2>รายการทั้งหมด (ตามปี)</h2>
+          <div id="reportContainerYear" class="report-container">
             <!-- เติมด้วย JS -->
           </div>
         </div>
@@ -636,11 +691,15 @@
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tab1">
         <span class="icon">📝</span>
-        บันทึกประจำวัน
+        บันทึก
       </button>
       <button class="tab-btn" data-tab="tab2">
-        <span class="icon">📊</span>
-        สรุปรายเดือน / ปี
+        <span class="icon">📅</span>
+        รายเดือน
+      </button>
+      <button class="tab-btn" data-tab="tab3">
+        <span class="icon">📆</span>
+        รายปี
       </button>
     </div>
   </div>
@@ -677,6 +736,7 @@
       { key: 'insurance',    label: 'ประกัน',             icon: '🛡️' },
       { key: 'education',    label: 'การศึกษา',           icon: '📚' },
       { key: 'travel',       label: 'ท่องเที่ยว',         icon: '✈️' },
+      { key: 'family',       label: 'ครอบครัว',           icon: '👨‍👩‍👧‍👦' },
       { key: 'otherExpense', label: 'อื่น ๆ',             icon: '✨' }
     ];
 
@@ -726,6 +786,12 @@
       const ym = `${yyyy}-${mm}`;
       filterMonth.value = ym;
       filterMonth.max = ym;
+
+      const filterYear = document.getElementById('filterYear');
+      if (filterYear) {
+        filterYear.value = String(yyyy);
+        filterYear.max = String(yyyy);
+      }
     }
 
     /* --- UI helpers --- */
@@ -784,35 +850,30 @@
       populateCategoryGrid();
     }
 
-    function updatePieChart(totalIncome, totalExpense) {
-      const pie = document.getElementById('pieChart');
-      const center = document.getElementById('pieCenterLabel');
-      const legendIncome = document.getElementById('legendIncome');
-      const legendExpense = document.getElementById('legendExpense');
-
+    function updatePieChart(totalIncome, totalExpense, pieChart, centerEl, legendIncome, legendExpense) {
       const total = totalIncome + totalExpense;
 
       legendIncome.textContent = formatNumber(totalIncome) + ' ฿';
       legendExpense.textContent = formatNumber(totalExpense) + ' ฿';
 
       if (total <= 0) {
-        pie.style.background = 'conic-gradient(#e5e7eb 0 100%)';
-        center.textContent = '0 : 0';
+        pieChart.style.background = 'conic-gradient(#e5e7eb 0 100%)';
+        centerEl.textContent = '0 : 0';
         return;
       }
 
       const incomePercent = (totalIncome / total) * 100;
       const expensePercent = 100 - incomePercent;
 
-      pie.style.background =
+      pieChart.style.background =
         `conic-gradient(var(--income-color) 0 ${incomePercent}%, var(--expense-color) ${incomePercent}% 100%)`;
 
       const iShort = Math.round(incomePercent);
       const eShort = 100 - iShort;
-      center.textContent = `${iShort}% : ${eShort}%`;
+      centerEl.textContent = `${iShort}% : ${eShort}%`;
     }
 
-    function getFilteredTransactions(allList) {
+    function getFilteredByMonth(allList) {
       const filterMonthVal = document.getElementById('filterMonth').value;
       if (!filterMonthVal) return allList;
 
@@ -822,6 +883,18 @@
         if (!item.date) return false;
         const [y, m] = item.date.split('-').map(x => parseInt(x, 10));
         return y === yFilter && m === mFilter;
+      });
+    }
+
+    function getFilteredByYear(allList) {
+      const filterYearVal = document.getElementById('filterYear').value;
+      const yFilter = parseInt(filterYearVal, 10);
+      if (!filterYearVal || isNaN(yFilter)) return allList;
+
+      return allList.filter(item => {
+        if (!item.date) return false;
+        const [y] = item.date.split('-').map(x => parseInt(x, 10));
+        return y === yFilter;
       });
     }
 
@@ -843,10 +916,15 @@
         formatNumber(balanceMonth) + ' ฿';
     }
 
-    function render(allList) {
-      const list = getFilteredTransactions(allList);
-      const reportContainer = document.getElementById('reportContainer');
-      reportContainer.innerHTML = '';
+    function renderAndSummarize(list, config) {
+      const container = document.getElementById(config.containerId);
+      const balanceEl = document.getElementById(config.balanceId);
+      const pieChart = document.getElementById(config.pieChartId);
+      const pieCenter = document.getElementById(config.pieCenterId);
+      const legendIncome = document.getElementById(config.legendIncomeId);
+      const legendExpense = document.getElementById(config.legendExpenseId);
+
+      container.innerHTML = '';
 
       let totalIncome = 0;
       let totalExpense = 0;
@@ -855,10 +933,10 @@
         const div = document.createElement('div');
         div.className = 'no-data';
         div.textContent = 'ยังไม่มีรายการในช่วงนี้';
-        reportContainer.appendChild(div);
+        container.appendChild(div);
 
-        document.getElementById('balance').textContent = '0.00 ฿';
-        updatePieChart(0, 0);
+        balanceEl.textContent = '0.00 ฿';
+        updatePieChart(0, 0, pieChart, pieCenter, legendIncome, legendExpense);
         return;
       }
 
@@ -965,17 +1043,39 @@
 
         table.appendChild(tbody);
         card.appendChild(table);
-        reportContainer.appendChild(card);
+        container.appendChild(card);
       });
 
-      document.getElementById('balance').textContent =
+      balanceEl.textContent =
         formatNumber(totalIncome - totalExpense) + ' ฿';
-      updatePieChart(totalIncome, totalExpense);
+      updatePieChart(totalIncome, totalExpense, pieChart, pieCenter, legendIncome, legendExpense);
     }
 
     function refreshUI() {
       const allList = loadTransactions();
-      render(allList);
+      const listMonth = getFilteredByMonth(allList);
+      const listYear = getFilteredByYear(allList);
+
+      const monthConfig = {
+        containerId: 'reportContainerMonth',
+        balanceId: 'balanceMonth',
+        pieChartId: 'pieChartMonth',
+        pieCenterId: 'pieCenterLabelMonth',
+        legendIncomeId: 'legendIncomeMonth',
+        legendExpenseId: 'legendExpenseMonth'
+      };
+
+      const yearConfig = {
+        containerId: 'reportContainerYear',
+        balanceId: 'balanceYear',
+        pieChartId: 'pieChartYear',
+        pieCenterId: 'pieCenterLabelYear',
+        legendIncomeId: 'legendIncomeYear',
+        legendExpenseId: 'legendExpenseYear'
+      };
+
+      renderAndSummarize(listMonth, monthConfig);
+      renderAndSummarize(listYear, yearConfig);
       updateMonthBalance(allList);
     }
 
@@ -1114,6 +1214,9 @@
         .addEventListener('click', addOrUpdateTransaction);
 
       document.getElementById('filterMonth')
+        .addEventListener('change', refreshUI);
+
+      document.getElementById('filterYear')
         .addEventListener('change', refreshUI);
 
       document.getElementById('btnClearAll')

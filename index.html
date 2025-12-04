@@ -16,14 +16,11 @@
       --radius-card: 16px;
       --shadow-card: 0 10px 25px rgba(15, 23, 42, 0.12);
       --accent: #0ea5e9;
-      --accent-soft: #e0f2fe;
       --income-color: #22c55e;
       --expense-color: #fb7185;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
@@ -79,7 +76,6 @@
       color: #0f172a;
     }
 
-    /* ฟอร์ม Money note (ด้านบน) */
     .panel {
       border-radius: var(--radius-card);
       padding: 14px 14px 16px;
@@ -87,9 +83,7 @@
       background: linear-gradient(135deg, rgba(224,242,254,0.9), rgba(248,250,252,0.95));
     }
 
-    .panel-form {
-      box-shadow: var(--shadow-card);
-    }
+    .panel-form { box-shadow: var(--shadow-card); }
 
     label {
       display: block;
@@ -98,13 +92,10 @@
       color: #374151;
     }
 
-    .field {
-      margin-bottom: 8px;
-    }
+    .field { margin-bottom: 8px; }
 
     input,
     select,
-    textarea,
     button {
       font-family: inherit;
       font-size: 14px;
@@ -113,8 +104,7 @@
     input[type="date"],
     input[type="number"],
     input[type="text"],
-    select,
-    textarea {
+    select {
       width: 100%;
       padding: 9px 11px;
       border-radius: 12px;
@@ -125,16 +115,10 @@
     }
 
     input:focus,
-    select:focus,
-    textarea:focus {
+    select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 2px rgba(14,165,233,0.25);
       background: #ffffff;
-    }
-
-    textarea {
-      min-height: 60px;
-      resize: vertical;
     }
 
     /* Toggle รายรับ / รายจ่าย */
@@ -223,6 +207,39 @@
     /* แดชบอร์ด */
     .panel-summary {
       background: linear-gradient(135deg, #fdf2ff, #e0f2fe);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #4b5563;
+    }
+
+    .filter-row span.label {
+      font-weight: 500;
+    }
+
+    .filter-row input[type="month"] {
+      width: auto;
+      min-width: 130px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .filter-clear-btn {
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      padding: 4px 6px;
     }
 
     .balance-box {
@@ -321,9 +338,7 @@
     .legend-dot.income { background: var(--income-color); }
     .legend-dot.expense { background: var(--expense-color); }
 
-    .legend-label {
-      font-weight: 600;
-    }
+    .legend-label { font-weight: 600; }
 
     .legend-amount {
       font-weight: 600;
@@ -368,13 +383,9 @@
       z-index: 1;
     }
 
-    tr:nth-child(even) td {
-      background: #f9fafb;
-    }
+    tr:nth-child(even) td { background: #f9fafb; }
 
-    .text-right {
-      text-align: right;
-    }
+    .text-right { text-align: right; }
 
     .tag-income {
       color: var(--income-color);
@@ -403,7 +414,7 @@
 <body>
   <div class="page-frame">
     <div class="page-inner">
-      <!-- ส่วนบน: Money note -->
+      <!-- ฟอร์มด้านบน -->
       <div class="panel panel-form">
         <h1>Money note</h1>
         <div class="subtitle">จดรายรับรายจ่ายแบบง่าย ๆ ทุกวัน</div>
@@ -440,20 +451,24 @@
         <div class="field">
           <label for="category">หมวดหมู่</label>
           <select id="category">
-            <option value="ทั่วไป">ทั่วไป</option>
-            <option value="ค่าบ้าน">ค่าบ้าน</option>
-            <option value="ค่ารถ">ค่ารถ</option>
-            <option value="ค่าอาหาร">ค่าอาหาร</option>
-            <option value="ค่าเดินทาง">ค่าเดินทาง</option>
-            <option value="บันเทิง">บันเทิง</option>
-            <option value="สุขภาพ">สุขภาพ</option>
-            <option value="อื่นๆ">อื่น ๆ</option>
+            <!-- รายรับ -->
+            <option value="เงินเดือน 💼">เงินเดือน 💼</option>
+            <option value="โบนัส 🎁">โบนัส 🎁</option>
+            <option value="ปันผลหุ้น 💸">ปันผลหุ้น 💸</option>
+            <option value="กำไรหุ้น / เทรด 📈">กำไรหุ้น / เทรด 📈</option>
+            <option value="ดอกเบี้ยเงินฝาก 💰">ดอกเบี้ยเงินฝาก 💰</option>
+            <option value="รายได้เสริม 🌟">รายได้เสริม 🌟</option>
+            <!-- รายจ่าย -->
+            <option value="ค่าอาหาร 🍚">ค่าอาหาร 🍚</option>
+            <option value="ค่าบ้าน 🏠">ค่าบ้าน 🏠</option>
+            <option value="ค่ารถ 🚗">ค่ารถ 🚗</option>
+            <option value="ค่าเดินทาง 🚆">ค่าเดินทาง 🚆</option>
+            <option value="ช้อปปิ้ง 🛍️">ช้อปปิ้ง 🛍️</option>
+            <option value="บันเทิง 🎬">บันเทิง 🎬</option>
+            <option value="สุขภาพ 🏥">สุขภาพ 🏥</option>
+            <option value="บิล/ค่าสาธารณูปโภค 💡">บิล/ค่าสาธารณูปโภค 💡</option>
+            <option value="อื่น ๆ ✨">อื่น ๆ ✨</option>
           </select>
-        </div>
-
-        <div class="field">
-          <label for="note">หมายเหตุ (ถ้ามี)</label>
-          <textarea id="note" placeholder="รายละเอียดเพิ่มเติม"></textarea>
         </div>
 
         <div class="button-row">
@@ -462,12 +477,18 @@
         </div>
       </div>
 
-      <!-- ส่วนล่าง: สรุป & Pie chart -->
+      <!-- สรุป & Pie chart -->
       <div class="panel panel-summary">
         <h2>สรุปภาพรวม</h2>
 
+        <div class="filter-row">
+          <span class="label">ดูตามเดือน / ปี:</span>
+          <input type="month" id="filterMonth">
+          <button class="filter-clear-btn" id="btnClearFilter">ดูทั้งหมด</button>
+        </div>
+
         <div class="balance-box">
-          <div class="balance-label">ยอดเงินคงเหลือทั้งหมด</div>
+          <div class="balance-label">ยอดเงินคงเหลือในช่วงที่เลือก</div>
           <div class="balance-value" id="balance">0.00 ฿</div>
         </div>
 
@@ -497,9 +518,9 @@
         </div>
       </div>
 
-      <!-- รายการทั้งหมด -->
+      <!-- ตารางรายการ -->
       <div class="table-panel">
-        <h2>รายการทั้งหมด</h2>
+        <h2>รายการทั้งหมด (ตามตัวกรอง)</h2>
         <div class="table-wrapper">
           <table>
             <thead>
@@ -512,7 +533,7 @@
               </tr>
             </thead>
             <tbody id="transactionTableBody">
-              <!-- แสดงรายการตรงนี้ -->
+              <!-- เติมด้วย JS -->
             </tbody>
           </table>
         </div>
@@ -540,12 +561,28 @@
       });
     }
 
-    function setToday() {
+    function todayString() {
       const d = new Date();
       const yyyy = d.getFullYear();
       const mm = String(d.getMonth() + 1).padStart(2, '0');
       const dd = String(d.getDate()).padStart(2, '0');
-      document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function setTodayAndMax() {
+      const dateInput = document.getElementById('date');
+      const today = todayString();
+      dateInput.value = today;
+      dateInput.max = today; // เลือกเกินวันนี้ไม่ได้
+
+      // filter month default = เดือนนี้
+      const filterMonth = document.getElementById('filterMonth');
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const ym = `${yyyy}-${mm}`;
+      filterMonth.value = ym;
+      filterMonth.max = ym;
     }
 
     function setType(type) {
@@ -574,8 +611,7 @@
       legendExpense.textContent = formatNumber(totalExpense) + ' ฿';
 
       if (total <= 0) {
-        pie.style.background =
-          'conic-gradient(#e5e7eb 0 100%)';
+        pie.style.background = 'conic-gradient(#e5e7eb 0 100%)';
         center.textContent = '0 : 0';
         return;
       }
@@ -591,8 +627,23 @@
       center.textContent = `${iShort}% : ${eShort}%`;
     }
 
+    function getFilteredTransactions(allList) {
+      const filterMonth = document.getElementById('filterMonth').value;
+      if (!filterMonth) return allList;
+
+      const [yFilter, mFilter] = filterMonth.split('-').map(x => parseInt(x, 10));
+
+      return allList.filter(item => {
+        if (!item.date) return false;
+        const [y, m] = item.date.split('-').map(x => parseInt(x, 10));
+        return y === yFilter && m === mFilter;
+      });
+    }
+
     function render() {
-      const list = loadTransactions();
+      const allList = loadTransactions();
+      const list = getFilteredTransactions(allList);
+
       const tbody = document.getElementById('transactionTableBody');
       tbody.innerHTML = '';
 
@@ -604,7 +655,7 @@
         const td = document.createElement('td');
         td.colSpan = 5;
         td.className = 'no-data';
-        td.textContent = 'ยังไม่มีรายการ';
+        td.textContent = 'ยังไม่มีรายการในช่วงนี้';
         tr.appendChild(td);
         tbody.appendChild(tr);
       } else {
@@ -653,21 +704,26 @@
     }
 
     function addTransaction() {
-      const date = document.getElementById('date').value;
-      const titleInput = document.getElementById('title');
-      const categoryInput = document.getElementById('category');
-      const amountInput = document.getElementById('amount');
-      const noteInput = document.getElementById('note');
+      const dateInput = document.getElementById('date');
+      const date = dateInput.value;
+      const maxDate = dateInput.max || todayString();
 
       if (!date) {
         alert('กรุณาเลือกวันที่');
         return;
       }
+      if (date > maxDate) {
+        alert('ไม่สามารถเลือกวันที่ล่วงหน้าได้');
+        return;
+      }
+
+      const titleInput = document.getElementById('title');
+      const categoryInput = document.getElementById('category');
+      const amountInput = document.getElementById('amount');
 
       const title = titleInput.value.trim();
       const category = categoryInput.value;
       const amount = parseFloat(amountInput.value || '0');
-      const note = noteInput.value.trim();
 
       if (!amount || amount <= 0) {
         alert('กรุณากรอกยอดเงินให้ถูกต้อง');
@@ -680,15 +736,12 @@
         type: currentType,
         title,
         category,
-        amount,
-        note
+        amount
       });
       saveTransactions(list);
 
-      // reset fields บางส่วน
       amountInput.value = '';
       titleInput.value = '';
-      noteInput.value = '';
 
       render();
     }
@@ -700,7 +753,6 @@
       }
     }
 
-    // ติด event ให้ปุ่ม (แก้บัคคลิกไม่ได้)
     function setupEvents() {
       document.getElementById('btnIncome')
         .addEventListener('click', () => setType('income'));
@@ -711,10 +763,19 @@
         .addEventListener('click', addTransaction);
       document.getElementById('btnClear')
         .addEventListener('click', clearAll);
+
+      document.getElementById('filterMonth')
+        .addEventListener('change', render);
+      document.getElementById('btnClearFilter')
+        .addEventListener('click', () => {
+          const filterMonth = document.getElementById('filterMonth');
+          filterMonth.value = '';
+          render();
+        });
     }
 
     window.onload = function () {
-      setToday();
+      setTodayAndMax();
       setupEvents();
       render();
     };

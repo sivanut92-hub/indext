@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>พอร์ตหุ้น + Trailing Stop (SET)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f4f5fb;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    .note {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      min-width: 120px;
+    }
+
+    .field label {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .field input {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+    }
+
+    button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: right;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th:nth-child(1),
+    th:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(1),
+    td:nth-child(2),
+    td:nth-child(3) {
+      text-align: left;
+    }
+
+    tr:hover {
+      background: #f3f4ff;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .pl-positive {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .pl-negative {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    .small {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+      table {
+        font-size: 0.8rem;
+      }
+      form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .field {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>พอร์ตหุ้น + Trailing Stop</h1>
+  <div class="note">
+    ✳️ เครื่องมือนี้เป็นตัวอย่างสำหรับใช้ส่วนตัวเท่านั้น<br />
+    คุณต้องผูกฟังก์ชัน <code>fetchCurrentPrice()</code> เข้ากับ API ข้อมูลราคาหุ้นที่คุณมีสิทธิ์ใช้งาน (เช่น API จากโบรกเกอร์ / SET SMART Marketplace) เอง
+  </div>
+
+  <div class="card">
+    <h2>เพิ่มรายการหุ้น</h2>
+    <form id="stock-form">
+      <div class="field">
+        <label for="symbol">รหัสหุ้น (เช่น AOT)</label>
+        <input id="symbol" required />
+      </div>
+      <div class="field">
+        <label for="shares">จำนวนหุ้น (เช่น 100)</label>
+        <input id="shares" type="number" step="1" min="0" required />
+      </div>
+      <div class="field">
+        <label for="buyPrice">ราคาซื้อเฉลี่ย (บาท)</label>
+        <input id="buyPrice" type="number" step="0.01" min="0" required />
+      </div>
+      <div class="field">
+        <label for="trailingPercent">Trailing Stop %</label>
+        <input id="trailingPercent" type="number" step="0.1" min="0" value="10" />
+      </div>
+      <button type="submit" class="btn-primary">เพิ่มเข้าในพอร์ต</button>
+      <button type="button" id="refresh-prices" class="btn-secondary">
+        อัปเดตราคาปัจจุบัน
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>รายการหุ้นในพอร์ต</h2>
+    <div class="small">
+      - ระบบจะจำข้อมูลใน browser (localStorage)<br />
+      - ทุกครั้งที่อัปเดตราคา ถ้าราคาปัจจุบัน &gt; ราคาสูงสุดเดิม จะอัปเดต <b>Highest Price</b> ให้อัตโนมัติ
+    </div>
+    <div style="overflow-x: auto; max-height: 60vh; margin-top: 10px;">
+      <table id="portfolio-table">
+        <thead>
+          <tr>
+            <th>ลบ</th>
+            <th>หุ้น</th>
+            <th>จำนวน</th>
+            <th>ราคาซื้อ</th>
+            <th>ราคาปัจจุบัน</th>
+            <th>มูลค่าลงทุน</th>
+            <th>มูลค่าปัจจุบัน</th>
+            <th>กำไร/ขาดทุน</th>
+            <th>% P/L</th>
+            <th>Highest Price</th>
+            <th>Trailing %</th>
+            <th>Trailing Stop</th>
+          </tr>
+        </thead>
+        <tbody id="portfolio-body">
+          <!-- rows will be injected here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // ====== CONFIG ตรงนี้ ======
+    // ถ้าคุณมี API จริง ให้ปรับฟังก์ชัน fetchCurrentPrice ด้านล่าง
+    const DEFAULT_TRAILING_PERCENT = 10;
+
+    // ====== Data Model & Storage ======
+    let portfolio = loadPortfolio();
+
+    function loadPortfolio() {
+      try {
+        const raw = localStorage.getItem("portfolio");
+        if (!raw) return [];
+        return JSON.parse(raw);
+      } catch (e) {
+        console.error("Failed to parse portfolio from localStorage", e);
+        return [];
+      }
+    }
+
+    function savePortfolio() {
+      localStorage.setItem("portfolio", JSON.stringify(portfolio));
+    }
+
+    function addStock(stock) {
+      portfolio.push(stock);
+      savePortfolio();
+      renderTable();
+    }
+
+    function removeStock(id) {
+      portfolio = portfolio.filter((s) => s.id !== id);
+      savePortfolio();
+      renderTable();
+    }
+
+    function updateStock(id, changes) {
+      portfolio = portfolio.map((s) => {
+        if (s.id === id) {
+          return { ...s, ...changes };
+        }
+        return s;
+      });
+      savePortfolio();
+      renderTable();
+    }
+
+    // ====== Rendering ======
+    function formatNumber(num, decimals = 2) {
+      if (num == null || isNaN(num)) return "-";
+      return Number(num).toLocaleString("th-TH", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("portfolio-body");
+      tbody.innerHTML = "";
+
+      portfolio.forEach((stock) => {
+        const {
+          id,
+          symbol,
+          shares,
+          buyPrice,
+          currentPrice,
+          highestPrice,
+          trailingPercent,
+        } = stock;
+
+        const sharesNum = Number(shares) || 0;
+        const buyNum = Number(buyPrice) || 0;
+        const currentNum = Number(currentPrice) || null;
+
+        const invested = sharesNum * buyNum;
+        const currentValue = currentNum != null ? sharesNum * currentNum : null;
+        const plValue =
+          currentValue != null && invested > 0 ? currentValue - invested : null;
+        const plPercent =
+          plValue != null && invested > 0 ? (plValue / invested) * 100 : null;
+
+        const highestNum = Number(highestPrice) || currentNum;
+        const trailPercent =
+          trailingPercent != null ? Number(trailingPercent) : DEFAULT_TRAILING_PERCENT;
+
+        const trailingStop =
+          highestNum != null ? highestNum * (1 - trailPercent / 100) : null;
+
+        const tr = document.createElement("tr");
+
+        // ปุ่มลบ
+        const tdDelete = document.createElement("td");
+        tdDelete.innerHTML = `<button class="btn-secondary" style="padding:2px 6px" data-id="${id}">x</button>`;
+        tdDelete.style.textAlign = "center";
+        tr.appendChild(tdDelete);
+
+        // รหัสหุ้น
+        const tdSymbol = document.createElement("td");
+        tdSymbol.innerHTML = `<span class="tag">${symbol}</span>`;
+        tr.appendChild(tdSymbol);
+
+        // จำนวน
+        const tdShares = document.createElement("td");
+        tdShares.textContent = formatNumber(sharesNum, 0);
+        tr.appendChild(tdShares);
+
+        // ราคาซื้อ
+        const tdBuy = document.createElement("td");
+        tdBuy.textContent = formatNumber(buyNum);
+        tr.appendChild(tdBuy);
+
+        // ราคาปัจจุบัน
+        const tdCurrent = document.createElement("td");
+        tdCurrent.textContent =
+          currentNum != null ? formatNumber(currentNum) : "-";
+        tr.appendChild(tdCurrent);
+
+        // มูลค่าลงทุน
+        const tdInvested = document.createElement("td");
+        tdInvested.textContent = formatNumber(invested);
+        tr.appendChild(tdInvested);
+
+        // มูลค่าปัจจุบัน
+        const tdCurVal = document.createElement("td");
+        tdCurVal.textContent =
+          currentValue != null ? formatNumber(currentValue) : "-";
+        tr.appendChild(tdCurVal);
+
+        // กำไร/ขาดทุน
+        const tdPL = document.createElement("td");
+        if (plValue != null) {
+          tdPL.textContent = formatNumber(plValue);
+          tdPL.className = plValue >= 0 ? "pl-positive" : "pl-negative";
+        } else {
+          tdPL.textContent = "-";
+        }
+        tr.appendChild(tdPL);
+
+        // % PL
+        const tdPLPercent = document.createElement("td");
+        if (plPercent != null) {
+          tdPLPercent.textContent = formatNumber(plPercent, 2) + " %";
+          tdPLPercent.className = plValue >= 0 ? "pl-positive" : "pl-negative";
+        } else {
+          tdPLPercent.textContent = "-";
+        }
+        tr.appendChild(tdPLPercent);
+
+        // Highest Price
+        const tdHigh = document.createElement("td");
+        tdHigh.textContent =
+          highestNum != null ? formatNumber(highestNum) : "-";
+        tr.appendChild(tdHigh);
+
+        // Trailing %
+        const tdTrailPercent = document.createElement("td");
+        const inputTrail = document.createElement("input");
+        inputTrail.type = "number";
+        inputTrail.step = "0.1";
+        inputTrail.min = "0";
+        inputTrail.value = trailPercent;
+        inputTrail.style.width = "60px";
+        inputTrail.addEventListener("change", (e) => {
+          updateStock(id, { trailingPercent: Number(e.target.value) });
+        });
+        tdTrailPercent.appendChild(inputTrail);
+        tr.appendChild(tdTrailPercent);
+
+        // Trailing Stop
+        const tdTrailStop = document.createElement("td");
+        tdTrailStop.textContent =
+          trailingStop != null ? formatNumber(trailingStop) : "-";
+        tr.appendChild(tdTrailStop);
+
+        tbody.appendChild(tr);
+      });
+
+      // bind delete buttons
+      tbody.querySelectorAll("button[data-id]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const id = e.target.getAttribute("data-id");
+          if (confirm("ลบรายการนี้ออกจากพอร์ต?")) {
+            removeStock(id);
+          }
+        });
+      });
+    }
+
+    // ====== Fetch ราคาปัจจุบัน ======
+    /**
+     * คุณต้องแก้ฟังก์ชันนี้ให้ดึงราคาจริงจาก API ที่คุณมีสิทธิ์ใช้งาน
+     * ตัวอย่าง: call server ของคุณ แล้วให้ server ดึงข้อมูลจาก SET / โบรกเกอร์อีกที
+     *
+     * ตัวอย่างโครง (สมมติคุณมี backend ที่ /api/price?symbol=AOT):
+     *
+     *   return fetch(`/api/price?symbol=${symbol}`)
+     *     .then(res => res.json())
+     *     .then(data => data.lastPrice);
+     *
+     * ฟังก์ชันนี้ต้อง return Promise<number|null>
+     */
+    async function fetchCurrentPrice(symbol) {
+      // ---- DEMO MODE: ไม่มี API จริง ให้ใส่ราคาจำลอง ----
+      // คุณควรลบส่วนนี้ออก แล้วแทนที่ด้วยการเรียก API จริง
+      console.warn(
+        "fetchCurrentPrice() ยังเป็นโหมด DEMO - แก้ตรงนี้ให้ใช้ API จริงเอง"
+      );
+
+      // ตัวอย่างจำลอง: สุ่มราคาประมาณ 50–80
+      const fakePrice = 50 + Math.random() * 30;
+      return Number(fakePrice.toFixed(2));
+    }
+
+    async function refreshAllPrices() {
+      if (!portfolio.length) return;
+
+      for (const stock of portfolio) {
+        const symbol = stock.symbol;
+        try {
+          const price = await fetchCurrentPrice(symbol);
+          if (price != null) {
+            const newHighest =
+              stock.highestPrice != null
+                ? Math.max(Number(stock.highestPrice), price)
+                : price;
+
+            updateStock(stock.id, {
+              currentPrice: price,
+              highestPrice: newHighest,
+            });
+          }
+        } catch (err) {
+          console.error("Error fetching price for", symbol, err);
+        }
+      }
+    }
+
+    // ====== Event Listeners ======
+    document
+      .getElementById("stock-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        const symbol = document.getElementById("symbol").value.trim().toUpperCase();
+        const shares = Number(document.getElementById("shares").value);
+        const buyPrice = Number(document.getElementById("buyPrice").value);
+        const trailingPercentRaw =
+          document.getElementById("trailingPercent").value;
+        const trailingPercent =
+          trailingPercentRaw === ""
+            ? DEFAULT_TRAILING_PERCENT
+            : Number(trailingPercentRaw);
+
+        if (!symbol || shares <= 0 || buyPrice <= 0) {
+          alert("กรุณาใส่ข้อมูลให้ครบและถูกต้อง");
+          return;
+        }
+
+        const newStock = {
+          id: Date.now().toString(),
+          symbol,
+          shares,
+          buyPrice,
+          currentPrice: null,
+          highestPrice: null,
+          trailingPercent,
+        };
+
+        addStock(newStock);
+
+        // clear form
+        document.getElementById("symbol").value = "";
+        document.getElementById("shares").value = "";
+        document.getElementById("buyPrice").value = "";
+        // trailingPercent คงค่าเดิมก็ได้
+      });
+
+    document
+      .getElementById("refresh-prices")
+      .addEventListener("click", function () {
+        refreshAllPrices();
+      });
+
+    // ====== Initial Render ======
+    renderTable();
+  </script>
+</body>
+</html>

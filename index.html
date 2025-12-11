@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>My Money note</title>
+  <title>Money note</title>
 
   <!-- ไอคอนสำหรับ iPhone / Add to Home Screen -->
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -13,7 +13,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="My Money note">
+  <meta name="apple-mobile-web-app-title" content="Money note">
 
   <style>
     :root {
@@ -656,7 +656,7 @@
       <!-- TAB 1: บันทึกประจำวัน -->
       <div id="tab1" class="tab-content active">
         <div class="panel panel-form">
-          <h1>My Money note</h1>
+          <h1>Money note</h1>
           <div class="subtitle">จดรายรับรายจ่ายแบบง่าย ๆ ทุกวัน</div>
 
           <div class="field">
@@ -820,7 +820,6 @@
     let currentType = 'income';
     let selectedCategoryKey = null;
     let editingId = null;
-    let activeCategoryDetailKey = null; // ใช้จำว่าตอนนี้กำลังดูหมวดไหนอยู่ในเดือนนั้น
 
     const incomeCategories = [
       { key: 'salary',     label: 'เงินเดือน',          icon: '💼' },
@@ -1019,7 +1018,6 @@
     }
 
     function resetCategoryDetailMonth() {
-       activeCategoryDetailKey = null; // รีเซ็ตสถานะเลือกหมวด
       const box = document.getElementById('categoryDetailMonth');
       if (!box) return;
       box.innerHTML = `
@@ -1134,21 +1132,14 @@
         item.appendChild(right);
 
         // click เพื่อดูรายละเอียดของหมวดนี้ในเดือนนั้น
-              item.addEventListener('click', () => {
-        // ถ้ากดหมวดเดิมที่เลือกอยู่ → ยกเลิกการเลือก + รีเซ็ตกล่องรายละเอียด
-            if (activeCategoryDetailKey === entry.key) {
-    activeCategoryDetailKey = null;
-    legendContainer.querySelectorAll('.legend-item').forEach(li => li.classList.remove('active'));
-    resetCategoryDetailMonth();
-    return;
-  }
+        item.addEventListener('click', () => {
+          legendContainer.querySelectorAll('.legend-item').forEach(li => li.classList.remove('active'));
+          item.classList.add('active');
+          showCategoryDetailsMonth(entry.key, entry.label, listMonth);
+        });
 
-  // ถ้าเลือกหมวดใหม่
-  activeCategoryDetailKey = entry.key;
-  legendContainer.querySelectorAll('.legend-item').forEach(li => li.classList.remove('active'));
-  item.classList.add('active');
-  showCategoryDetailsMonth(entry.key, entry.label, listMonth);
-});
+        legendContainer.appendChild(item);
+      });
     }
 
     function getFilteredByMonth(allList) {
@@ -1236,7 +1227,7 @@
         const dayItems = groups[dateStr];
 
         const card = document.createElement('div');
-        card.className = 'day-card collapsed';
+        card.className = 'day-card';
 
         const header = document.createElement('div');
         header.className = 'day-header';
@@ -1630,6 +1621,3 @@
   </script>
 </body>
 </html>
-
-
-
